@@ -23,7 +23,7 @@ declare namespace adal {
         popUp?: boolean;
         localLoginUrl?: string;
         displayCall?: (urlNavigate: string) => any;
-        postLogoutRedirectUri?: string; // redirect url after succesful logout operation
+        postLogoutRedirectUri?: string; // redirect url after successful logout operation
         cacheLocation?: string;
         anonymousEndpoints?: string[];
         expireOffsetSeconds?: number;
@@ -32,6 +32,7 @@ declare namespace adal {
         resource?: string;
         extraQueryParameter?: string;
         navigateToLoginRequestUrl?: boolean;
+        doRefresh: () => Promise<boolean>;
     }
 
     /**

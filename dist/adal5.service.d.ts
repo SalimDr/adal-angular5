@@ -17,6 +17,7 @@ export declare class Adal5Service {
      */
     private adalContext;
     private loginRefreshTimer;
+    private doRefresh;
     /**
      *
      *
@@ -173,21 +174,16 @@ export declare class Adal5Service {
      *
      * @memberOf Adal5Service
      */
-    private updateDataFromCache(resource);
+    private updateDataFromCache;
     /**
      *
      *
      *
      * @memberOf Adal5Service
      */
-    private refreshLoginToken();
-    private now();
+    private refreshLoginToken;
+    private rejectProlong;
+    private now;
     private readonly isInCallbackRedirectMode;
-    /**
-       *
-       *
-       *
-       * @memberOf Adal5Service
-       */
-    private setupLoginTokenRefreshTimer();
+    private setupLoginTokenRefreshTimer;
 }
