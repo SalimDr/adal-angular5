@@ -15,7 +15,7 @@ var http_1 = require("@angular/common/http");
  * @export
  * @class Adal5HTTPService
  */
-var Adal5HTTPService = (function () {
+var Adal5HTTPService = /** @class */ (function () {
     /**
      * Creates an instance of Adal5HTTPService.
      * @param {HttpClient} http
@@ -169,10 +169,10 @@ var Adal5HTTPService = (function () {
         console.error(JSON.stringify(error)); // log to console instead
         return Rx_1.Observable.throw(error);
     };
+    var Adal5HTTPService_1;
     Adal5HTTPService = Adal5HTTPService_1 = __decorate([
         core_1.Injectable()
     ], Adal5HTTPService);
     return Adal5HTTPService;
-    var Adal5HTTPService_1;
 }());
 exports.Adal5HTTPService = Adal5HTTPService;

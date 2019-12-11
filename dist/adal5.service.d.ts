@@ -18,6 +18,7 @@ export declare class Adal5Service {
     private adalContext;
     private loginRefreshTimer;
     private doRefresh;
+    private doRefreshOption;
     /**
      *
      *
