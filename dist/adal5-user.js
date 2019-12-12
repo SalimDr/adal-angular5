@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @export
  * @class Adal5User
  */
-var Adal5User = /** @class */ (function () {
+var Adal5User = (function () {
     function Adal5User() {
     }
     return Adal5User;

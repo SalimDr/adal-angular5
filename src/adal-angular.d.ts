@@ -8,6 +8,13 @@ declare var Logging: adal.Logging;
 
 declare namespace adal {
 
+  type DoRefreshExpiration = () => Promise<adal.DoRefreshExpirationParam>;
+
+  interface DoRefreshExpirationParam {
+    shouldProlong: boolean,
+    callbackFn?: () => void
+  }
+
   /**
    *
    *
@@ -31,7 +38,7 @@ declare namespace adal {
     resource?: string;
     extraQueryParameter?: string;
     navigateToLoginRequestUrl?: boolean;
-    doRefresh: () => Promise<boolean>;
+    doRefresh: DoRefreshExpiration;
   }
 
   /**

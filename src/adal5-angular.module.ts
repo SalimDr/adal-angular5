@@ -11,7 +11,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
     exports: [
         Adal5User, Adal5Service, Adal5HTTPService, Adal5Interceptor
     ],
-    providers: [,
+    providers: [
         {
             provide: HTTP_INTERCEPTORS,
             useClass: Adal5Interceptor,
@@ -19,4 +19,4 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
         },
     ],
 })
-export class Adal5AgnularModule { }
+export class Adal5AngularModule { }

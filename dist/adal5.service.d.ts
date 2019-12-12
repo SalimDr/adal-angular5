@@ -175,16 +175,16 @@ export declare class Adal5Service {
      *
      * @memberOf Adal5Service
      */
-    private updateDataFromCache;
+    private updateDataFromCache(resource);
     /**
      *
      *
      *
      * @memberOf Adal5Service
      */
-    private refreshLoginToken;
-    private rejectProlong;
-    private now;
+    private refreshLoginToken();
+    private rejectProlong();
+    private now();
     private readonly isInCallbackRedirectMode;
-    private setupLoginTokenRefreshTimer;
+    private setupLoginTokenRefreshTimer();
 }
