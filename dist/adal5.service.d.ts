@@ -17,6 +17,8 @@ export declare class Adal5Service {
      */
     private adalContext;
     private loginRefreshTimer;
+    private doRefresh;
+    private doRefreshOption;
     /**
      *
      *
@@ -181,13 +183,8 @@ export declare class Adal5Service {
      * @memberOf Adal5Service
      */
     private refreshLoginToken();
+    private rejectProlong();
     private now();
     private readonly isInCallbackRedirectMode;
-    /**
-       *
-       *
-       *
-       * @memberOf Adal5Service
-       */
     private setupLoginTokenRefreshTimer();
 }

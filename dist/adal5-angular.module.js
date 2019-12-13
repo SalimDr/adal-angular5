@@ -12,16 +12,16 @@ var adal5_service_1 = require("./adal5.service");
 var adal5_http_service_1 = require("./adal5-http.service");
 var core_1 = require("@angular/core");
 var http_1 = require("@angular/common/http");
-var Adal5AgnularModule = (function () {
-    function Adal5AgnularModule() {
+var Adal5AngularModule = (function () {
+    function Adal5AngularModule() {
     }
-    Adal5AgnularModule = __decorate([
+    Adal5AngularModule = __decorate([
         core_1.NgModule({
             imports: [],
             exports: [
                 adal5_user_1.Adal5User, adal5_service_1.Adal5Service, adal5_http_service_1.Adal5HTTPService, adal5_interceptor_1.Adal5Interceptor
             ],
-            providers: [,
+            providers: [
                 {
                     provide: http_1.HTTP_INTERCEPTORS,
                     useClass: adal5_interceptor_1.Adal5Interceptor,
@@ -29,7 +29,7 @@ var Adal5AgnularModule = (function () {
                 },
             ],
         })
-    ], Adal5AgnularModule);
-    return Adal5AgnularModule;
+    ], Adal5AngularModule);
+    return Adal5AngularModule;
 }());
-exports.Adal5AgnularModule = Adal5AgnularModule;
+exports.Adal5AngularModule = Adal5AngularModule;

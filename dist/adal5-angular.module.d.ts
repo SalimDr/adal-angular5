@@ -1,2 +1,2 @@
-export declare class Adal5AgnularModule {
+export declare class Adal5AngularModule {
 }

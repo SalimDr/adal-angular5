@@ -1,11 +1,14 @@
 import * as adalLib from 'adal-angular';
-import { adal } from 'adal-angular';
 import { Adal5User } from './adal5-user';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
-import User = adal.User;
-import { take } from "rxjs/operator/take";
 import { Subscription } from 'rxjs/Subscription';
+import { isFunction } from 'rxjs/util/isFunction';
+import User = adal.User;
+import DoRefreshExpirationParam = adal.DoRefreshExpirationParam;
+import DoRefreshExpiration = adal.DoRefreshExpiration;
+
+const defaultDoRefreshOption: DoRefreshExpiration = () => Promise.resolve(<DoRefreshExpirationParam>{ shouldProlong: true });
 
 /**
  *
@@ -24,8 +27,9 @@ export class Adal5Service {
    * @memberOf Adal5Service
    */
   private adalContext: adal.AuthenticationContext;
-  private loginRefreshTimer : Subscription;
-
+  private loginRefreshTimer: Subscription;
+  private doRefresh: DoRefreshExpiration;
+  private doRefreshOption: DoRefreshExpiration;
   /**
    *
    *
@@ -47,7 +51,8 @@ export class Adal5Service {
    *
    * @memberOf Adal5Service
    */
-  constructor() { }
+  constructor() {
+  }
 
   /**
    *
@@ -71,6 +76,10 @@ export class Adal5Service {
 
     configOptions.redirectUri = configOptions.redirectUri || pathDefault;
     configOptions.postLogoutRedirectUri = configOptions.postLogoutRedirectUri || pathDefault;
+    // Get backup of configuration RefreshOption
+    this.doRefreshOption = configOptions.doRefresh || defaultDoRefreshOption;
+    // Set the configuration
+    this.doRefresh = this.doRefreshOption;
 
     // create instance with given config
     this.adalContext = adalLib.inject(configOptions);
@@ -81,10 +90,13 @@ export class Adal5Service {
     this.updateDataFromCache(this.adalContext.config.loginResource);
 
     if (this.adal5User.loginCached && !this.adal5User.authenticated && window.self == window.top && !this.isInCallbackRedirectMode) {
+      // Override configuration if no authentication
+      this.doRefresh = defaultDoRefreshOption;
       this.refreshLoginToken();
     } else if (this.adal5User.loginCached && this.adal5User.authenticated && !this.loginRefreshTimer && window.self == window.top) {
       this.setupLoginTokenRefreshTimer();
     }
+
   }
 
   /**
@@ -236,10 +248,11 @@ export class Adal5Service {
    * @memberOf Adal5Service
    */
   public getUser(): Observable<any> {
+    const _this = this;   // save outer this for inner function
     return Observable.bindCallback((cb: (u: adal.User) => User) => {
-      this.adalContext.getUser(function (error: string, user: adal.User) {
+      _this.adalContext.getUser(function (error: string, user: adal.User) {
         if (error) {
-          this.adalContext.error('Error when getting user', error);
+          _this.adalContext.error('Error when getting user', error);
           cb(null);
         } else {
           cb(user);
@@ -311,7 +324,7 @@ export class Adal5Service {
    * @memberOf Adal5Service
    */
   public getToken(): string {
-    if(this.adalContext){
+    if (this.adalContext) {
       return this.adalContext._getItem(this.adalContext.CONSTANTS.STORAGE.ACCESS_TOKEN_KEY + this.adalContext.config.loginResource);
     } else {
       this.adal5User.token;
@@ -365,42 +378,65 @@ export class Adal5Service {
     if (!this.adal5User.loginCached) {
       throw ('User not logged in');
     }
-    this.acquireToken(this.adalContext.config.loginResource).subscribe((token: string) => {
-        this.adal5User.token = token;
-        this.userInfo.token = token;
-        if (!this.adal5User.authenticated) {
+
+    this.doRefresh().then((doRefreshExpiration: DoRefreshExpirationParam) => {
+      if (doRefreshExpiration.shouldProlong) {
+        this.acquireToken(this.adalContext.config.loginResource).subscribe((token: string) => {
+          this.adal5User.token = token;
+          this.userInfo.token = token;
+          if (!this.adal5User.authenticated) {
             // refresh the page
             window.location.reload();
-        } else {
+          } else {
+            // Restore configuration if token true
+            this.doRefresh = this.doRefreshOption;
             this.setupLoginTokenRefreshTimer();
-        }
-    }, (error: string) => {
-        this.adal5User.authenticated = false;
-        this.adal5User.error = this.adalContext.getLoginError();
+
+            if (isFunction(doRefreshExpiration.callbackFn)) {
+              doRefreshExpiration.callbackFn();
+            }
+          }
+        }, (error: string) => {
+          this.rejectProlong();
+        });
+      } else {
+        this.rejectProlong();
+        this.clearCache();
+      }
+    }).catch(() => {
+      console.warn('Do refresh task has been dismissed');
+      this.doRefresh = defaultDoRefreshOption;
     });
-}
+  }
+
+  private rejectProlong(): void {
+    this.adal5User.authenticated = false;
+    this.adal5User.error = this.adalContext.getLoginError();
+  }
 
   private now(): number {
-      return Math.round(new Date().getTime() / 1000.0);
+    return Math.round(new Date().getTime() / 1000.0);
   }
-  
+
   private get isInCallbackRedirectMode(): boolean {
-    return window.location.href.indexOf("#access_token") !== -1 || window.location.href.indexOf("#id_token") !== -1;
+    return window.location.href.indexOf('#access_token') !== -1 || window.location.href.indexOf('#id_token') !== -1;
   };
-  
+
   private setupLoginTokenRefreshTimer(): void {
     // Get expiration of login token
-    let exp = this.adalContext._getItem(this.adalContext.CONSTANTS.STORAGE.EXPIRATION_KEY + <any>this.adalContext.config.loginResource);
-  
+    const exp = this.adalContext._getItem(this.adalContext.CONSTANTS.STORAGE.EXPIRATION_KEY + <any>this.adalContext.config.loginResource);
+
     // Either wait until the refresh window is valid or refresh in 1 second (measured in seconds)
-    let timerDelay = exp - this.now() - (this.adalContext.config.expireOffsetSeconds || 300) > 0 ? exp - this.now() - (this.adalContext.config.expireOffsetSeconds || 300) : 1;
+    const timerDelay = exp - this.now() - (this.adalContext.config.expireOffsetSeconds || 300) > 0
+      ? exp - this.now() - (this.adalContext.config.expireOffsetSeconds || 300)
+      : 1;
     if (this.loginRefreshTimer) {
       this.loginRefreshTimer.unsubscribe();
     }
     this.loginRefreshTimer = Observable.timer(timerDelay * 1000)
-        .take(1)
-        .subscribe((x) => {
-      this.refreshLoginToken();
-    });
+      .take(1)
+      .subscribe((x) => {
+        this.refreshLoginToken();
+      });
   }
 }
