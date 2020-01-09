@@ -182,8 +182,8 @@ export declare class Adal5Service {
      *
      * @memberOf Adal5Service
      */
-    private refreshLoginToken();
-    private rejectProlong();
+    refreshLoginToken(): void;
+    rejectProlong(): void;
     private now();
     private readonly isInCallbackRedirectMode;
     private setupLoginTokenRefreshTimer();
