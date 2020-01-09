@@ -374,7 +374,7 @@ export class Adal5Service {
    *
    * @memberOf Adal5Service
    */
-  private refreshLoginToken(): void {
+  public refreshLoginToken(): void {
     if (!this.adal5User.loginCached) {
       throw ('User not logged in');
     }
@@ -409,7 +409,7 @@ export class Adal5Service {
     });
   }
 
-  private rejectProlong(): void {
+  public rejectProlong(): void {
     this.adal5User.authenticated = false;
     this.adal5User.error = this.adalContext.getLoginError();
   }
