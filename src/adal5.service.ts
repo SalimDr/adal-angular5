@@ -381,6 +381,10 @@ export class Adal5Service {
 
     this.doRefresh().then((doRefreshExpiration: DoRefreshExpirationParam) => {
       if (doRefreshExpiration.shouldProlong) {
+        if (doRefreshExpiration.forceSetToken) {
+          this.refreshDataFromCache();
+          this.handleWindowCallback();
+        }
         this.acquireToken(this.adalContext.config.loginResource).subscribe((token: string) => {
           this.adal5User.token = token;
           this.userInfo.token = token;

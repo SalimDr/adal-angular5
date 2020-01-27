@@ -12,7 +12,8 @@ declare namespace adal {
 
   interface DoRefreshExpirationParam {
     shouldProlong: boolean,
-    callbackFn?: () => void
+    callbackFn?: () => void,
+    forceSetToken: boolean
   }
 
   /**
