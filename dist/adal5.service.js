@@ -345,38 +345,42 @@ var Adal5Service = (function () {
      * @memberOf Adal5Service
      */
     Adal5Service.prototype.refreshLoginToken = function () {
-        var _this = this;
+        var _this_1 = this;
         if (!this.adal5User.loginCached) {
             throw ('User not logged in');
         }
         this.doRefresh().then(function (doRefreshExpiration) {
             if (doRefreshExpiration.shouldProlong) {
-                _this.acquireToken(_this.adalContext.config.loginResource).subscribe(function (token) {
-                    _this.adal5User.token = token;
-                    _this.userInfo.token = token;
-                    if (!_this.adal5User.authenticated) {
+                if (doRefreshExpiration.forceSetToken) {
+                    _this_1.refreshDataFromCache();
+                    _this_1.handleWindowCallback();
+                }
+                _this_1.acquireToken(_this_1.adalContext.config.loginResource).subscribe(function (token) {
+                    _this_1.adal5User.token = token;
+                    _this_1.userInfo.token = token;
+                    if (!_this_1.adal5User.authenticated) {
                         // refresh the page
                         window.location.reload();
                     }
                     else {
                         // Restore configuration if token true
-                        _this.doRefresh = _this.doRefreshOption;
-                        _this.setupLoginTokenRefreshTimer();
+                        _this_1.doRefresh = _this_1.doRefreshOption;
+                        _this_1.setupLoginTokenRefreshTimer();
                         if (isFunction_1.isFunction(doRefreshExpiration.callbackFn)) {
                             doRefreshExpiration.callbackFn();
                         }
                     }
                 }, function (error) {
-                    _this.rejectProlong();
+                    _this_1.rejectProlong();
                 });
             }
             else {
-                _this.rejectProlong();
-                _this.clearCache();
+                _this_1.rejectProlong();
+                _this_1.clearCache();
             }
         }).catch(function () {
             console.warn('Do refresh task has been dismissed');
-            _this.doRefresh = defaultDoRefreshOption;
+            _this_1.doRefresh = defaultDoRefreshOption;
         });
     };
     Adal5Service.prototype.rejectProlong = function () {
@@ -395,7 +399,7 @@ var Adal5Service = (function () {
     });
     ;
     Adal5Service.prototype.setupLoginTokenRefreshTimer = function () {
-        var _this = this;
+        var _this_1 = this;
         // Get expiration of login token
         var exp = this.adalContext._getItem(this.adalContext.CONSTANTS.STORAGE.EXPIRATION_KEY + this.adalContext.config.loginResource);
         // Either wait until the refresh window is valid or refresh in 1 second (measured in seconds)
@@ -408,7 +412,7 @@ var Adal5Service = (function () {
         this.loginRefreshTimer = Rx_1.Observable.timer(timerDelay * 1000)
             .take(1)
             .subscribe(function (x) {
-            _this.refreshLoginToken();
+            _this_1.refreshLoginToken();
         });
     };
     Adal5Service = __decorate([
