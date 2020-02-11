@@ -352,8 +352,8 @@ var Adal5Service = (function () {
         this.doRefresh().then(function (doRefreshExpiration) {
             if (doRefreshExpiration.shouldProlong) {
                 if (doRefreshExpiration.forceSetToken) {
-                    _this_1.refreshDataFromCache();
                     _this_1.handleWindowCallback();
+                    _this_1.refreshDataFromCache();
                 }
                 _this_1.acquireToken(_this_1.adalContext.config.loginResource).subscribe(function (token) {
                     _this_1.adal5User.token = token;
